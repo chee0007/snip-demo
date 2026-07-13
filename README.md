@@ -33,10 +33,15 @@ snip-demo/
 ├── backend/    → backend branch (Bun server)
 ├── frontend/   → frontend branch (Angular app)
 ├── cli/        → cli branch (Node CLI)
+├── bundle/     → bundle branch (generated deployment bundle)
+├── scripts/
+│   └── build-bundle.mjs  — Bundle build script
 └── README.md   (this file)
 ```
 
 Each folder is a **Git submodule** tracking its respective branch of the same repository.
+
+**Note**: The `bundle/` submodule contains generated output assembled by `scripts/build-bundle.mjs`. Do not edit files in `bundle/` directly — they will be overwritten on the next build.
 
 ## Cloning
 
@@ -113,6 +118,58 @@ snip ls
 
 # Open a link in browser
 snip open <code>
+```
+
+## Bundle Build (Deployment Package)
+
+The `bundle/` submodule contains a complete, ready-to-deploy package that combines all three layers:
+
+- **server.js** — Backend server
+- **cli.js** — CLI tool  
+- **public/** — Built frontend (static files)
+- **.env** — Environment config (`PUBLIC_DIR=./public`)
+- **package.json** — Deployment manifest
+- **Dockerfile** — Container image definition
+- **railway.json** — Railway deployment config
+
+### Building the Bundle
+
+```bash
+# Build and commit (but don't push)
+node scripts/build-bundle.mjs
+
+# Build, commit, and push to remote
+node scripts/build-bundle.mjs --push
+```
+
+The script is **idempotent** — running it multiple times without changes is a safe no-op.
+
+**What the script does:**
+1. Updates all submodules to their latest commits
+2. Builds the Angular frontend (`npm install` + `ng build`)
+3. Copies backend, CLI, and built frontend to `bundle/`
+4. Generates deployment config files
+5. Commits in `bundle/` if there are changes
+6. Updates the submodule pointer in `main`
+7. Optionally pushes both branches with `--push`
+
+### Deploying the Bundle
+
+The bundle branch can be deployed directly:
+
+```bash
+# Clone just the bundle branch
+git clone -b bundle --single-branch https://github.com/chee0007/snip-demo snip-deploy
+cd snip-deploy
+bun start
+# Server runs on port 3000, serving both API and frontend
+```
+
+Or build a Docker image:
+
+```bash
+docker build -t snip .
+docker run -p 3000:3000 snip
 ```
 
 ## Development Workflow
