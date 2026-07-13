@@ -1,0 +1,12 @@
+[submodule "backend"]
+	path = backend
+	url = https://github.com/chee0007/snip-demo
+	branch = backend
+[submodule "frontend"]
+	path = frontend
+	url = https://github.com/chee0007/snip-demo
+	branch = frontend
+[submodule "cli"]
+	path = cli
+	url = https://github.com/chee0007/snip-demo
+	branch = cli
