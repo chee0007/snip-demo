@@ -1,0 +1,72 @@
+<div class="container">
+  <header>
+    <h1>✂️ Snip</h1>
+    <p>Tiny URL Shortener</p>
+  </header>
+
+  <section class="create-form">
+    <h2>Create Short Link</h2>
+    <div class="form-group">
+      <input 
+        type="url" 
+        [(ngModel)]="url"
+        placeholder="Enter URL (http:// or https://)"
+        (keyup.enter)="createShortLink()"
+        [disabled]="loading()"
+      />
+      <button 
+        (click)="createShortLink()" 
+        [disabled]="!isValidUrl() || loading()"
+      >
+        {{ loading() ? 'Creating...' : 'Shorten' }}
+      </button>
+    </div>
+
+    @if (error()) {
+      <div class="message error">
+        {{ error() }}
+      </div>
+    }
+
+    @if (createdLink()) {
+      <div class="message success">
+        <strong>Short link created!</strong>
+        <div class="short-url">
+          <a [href]="createdLink()!.shortUrl" target="_blank">
+            {{ createdLink()!.shortUrl }}
+          </a>
+        </div>
+      </div>
+    }
+  </section>
+
+  <section class="links-table">
+    <h2>All Links ({{ links().length }})</h2>
+    @if (links().length === 0) {
+      <p class="empty">No links yet. Create one above!</p>
+    } @else {
+      <table>
+        <thead>
+          <tr>
+            <th>Short Code</th>
+            <th>Original URL</th>
+            <th>Hits</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (link of links(); track link.code) {
+            <tr>
+              <td>
+                <a [href]="link.shortUrl" target="_blank" class="code">
+                  {{ link.code }}
+                </a>
+              </td>
+              <td class="url">{{ link.url }}</td>
+              <td class="hits">{{ link.hits }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+  </section>
+</div>
